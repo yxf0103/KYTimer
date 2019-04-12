@@ -1,0 +1,16 @@
+PODS:
+  - KYTimer (0.1.0)
+
+DEPENDENCIES:
+  - KYTimer (from `../`)
+
+EXTERNAL SOURCES:
+  KYTimer:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  KYTimer: f849dad87e772ae44130579b7719055539e9003b
+
+PODFILE CHECKSUM: eeca0fd79a0eea68ad6d006f66a1d87eba375a76
+
+COCOAPODS: 1.6.1
