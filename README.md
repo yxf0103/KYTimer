@@ -1,4 +1,6 @@
 # KYTimer
+a memory safe timer.
+
 
 [![CI Status](https://img.shields.io/travis/massyxf/KYTimer.svg?style=flat)](https://travis-ci.org/massyxf/KYTimer)
 [![Version](https://img.shields.io/cocoapods/v/KYTimer.svg?style=flat)](https://cocoapods.org/pods/KYTimer)
