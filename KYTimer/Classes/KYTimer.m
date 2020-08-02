@@ -9,83 +9,102 @@
 #import "KYTimer.h"
 #import <objc/runtime.h>
 
+@interface KYTimerProxy : NSProxy
+
+///target
+@property (nonatomic,weak)id target;
+
+
+-(instancetype)initWithTarget:(id)target;
+
+@end
+
+@implementation KYTimerProxy
+
+-(instancetype)initWithTarget:(id)target{
+    _target = target;
+    return self;
+}
+
+-(void)forwardInvocation:(NSInvocation *)invocation{
+    [invocation invokeWithTarget:_target];
+}
+
+-(NSMethodSignature *)methodSignatureForSelector:(SEL)sel{
+    return [_target methodSignatureForSelector:sel];
+}
+
+
+
+@end
+
 @interface KYTimer ()
 
-/*timer*/
-@property (nonatomic,weak)NSTimer *timer;
+///是否是nstimer类型
+@property (nonatomic,assign)BOOL isNSTimer;
 
-/*proxy*/
-@property (nonatomic,weak)id proxy;
+///nstimer timer
+@property (nonatomic,strong)NSTimer *timer;
 
-//⚠️dispatch_source_t  GCD对象应该看作一个对象，所以其修饰符为strong或者retain
-//现在retain也可以在arc中使用了，作用等同于strong
-/*timer*/
+///gcd timer
 @property (nonatomic,strong)dispatch_source_t gcdTimer;
 
 @end
 
 @implementation KYTimer
 
-+(instancetype)timerWithTimeInterval:(NSTimeInterval)ti proxy:(nonnull id)proxy selector:(nonnull SEL)aSelector userInfo:(nullable id)userInfo repeats:(BOOL)yesOrNo{
-    KYTimer *kytimer = [[self alloc] init];
-    NSTimer *timer = [NSTimer timerWithTimeInterval:ti
-                                             target:kytimer
-                                           selector:aSelector
++(instancetype)timerWithTimeInterval:(NSTimeInterval)interval target:(id)target selector:(SEL)sel userInfo:(id)userInfo repeat:(BOOL)repeat{
+    KYTimer *kt = [[self alloc] init];
+    KYTimerProxy *proxy = [[KYTimerProxy alloc] initWithTarget:target];
+    NSTimer *timer = [NSTimer timerWithTimeInterval:interval
+                                             target:proxy
+                                           selector:sel
                                            userInfo:userInfo
-                                            repeats:yesOrNo];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
-    kytimer.timer = timer;
-    kytimer.proxy = proxy;
-    
-    return kytimer;
-}
-
--(void)fire{
-    [self.timer fire];
-}
-
--(void)stop{
-    [self.timer invalidate];
-    self.timer = nil;
-}
-
-//第二次机会: 备援接收者
--(id)forwardingTargetForSelector:(SEL)aSelector{
-    if ([self.proxy respondsToSelector:aSelector]) {
-        return self.proxy;
-    }
-    return [super forwardingTargetForSelector:aSelector];
-}
-
-#pragma mark - gcd timer
-+(instancetype)gcdTimerWithStartInterval:(NSInteger)dateInterval
-                            timeInterval:(NSTimeInterval)ti
-                                  repeat:(BOOL)repeatAble
-                                  action:(void (^)(void))action{
-    KYTimer *kt = [[KYTimer alloc] init];
-    
-    dispatch_queue_t queue = dispatch_get_global_queue(0, 0);
-    dispatch_source_t gt = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
-    kt.gcdTimer = gt;
-    
-    __weak typeof(kt) wt = kt;
-    dispatch_source_set_event_handler(gt, ^{
-        action();
-        if (!repeatAble) {
-            [wt gcdStop];
-        }
-    });
-    
-    //首次执行时间、执行间隔和精确度
-    dispatch_source_set_timer(gt, dispatch_time(DISPATCH_TIME_NOW, dateInterval * NSEC_PER_SEC), ti * NSEC_PER_SEC, 0.1 * NSEC_PER_SEC);
-    
+                                            repeats:repeat];
+    kt.timer = timer;
+    kt.isNSTimer = YES;
     return kt;
 }
 
++(instancetype)gcdTimerWithStartInterval:(NSTimeInterval)startTime timeInterval:(NSTimeInterval)interval action:(void (^)(void))action queue:(dispatch_queue_t)queue repeat:(BOOL)repeat{
+    KYTimer *kt = [[KYTimer alloc] init];
+    kt.isNSTimer = NO;
+    
+    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
+    dispatch_source_set_timer(timer,
+                              dispatch_time(DISPATCH_TIME_NOW,  startTime* NSEC_PER_SEC),
+                              interval * NSEC_PER_SEC,
+                              0.05 * NSEC_PER_SEC);
+    __weak typeof(kt) wt = kt;
+    dispatch_source_set_event_handler(timer, ^{
+        if (!wt) { return; }
+        action();
+        if (!repeat) {
+            [wt gcdStop];
+        }
+    });
+    kt.gcdTimer = timer;
+    return kt;
+}
+
+-(void)addTimerToRunloop:(NSRunLoop *)runloop mode:(NSRunLoopMode)mode{
+    [runloop addTimer:_timer forMode:mode];
+}
+
 -(void)gcdFire{
+    NSAssert(!_isNSTimer, @"不是基于gcd的timer,请使用addTimerToRunloop:(NSRunLoop *)runloop mode:(NSRunLoopMode)mode");
     if (_gcdTimer) {
         dispatch_resume(_gcdTimer);
     }
+}
+
+-(void)stop{
+    if (_isNSTimer) {
+        [_timer invalidate];
+        _timer = nil;
+        return;
+    }
+    [self gcdStop];
 }
 
 -(void)gcdStop{
@@ -93,6 +112,11 @@
         dispatch_source_cancel(_gcdTimer);
         _gcdTimer = nil;
     }
+}
+
+-(void)dealloc{
+    NSLog(@"dealloc:%@",[self class]);
+    [self stop];
 }
 
 @end

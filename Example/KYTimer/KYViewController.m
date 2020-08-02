@@ -7,15 +7,10 @@
 //
 
 #import "KYViewController.h"
-#import "KYTimer.h"
+#import "KYTimerViewController.h"
 
 @interface KYViewController ()
 
-/*timer*/
-@property (nonatomic,strong)KYTimer *timer;
-
-/*timer*/
-@property (nonatomic,strong)KYTimer *gcdTimer;
 
 @end
 
@@ -25,22 +20,14 @@
 {
     [super viewDidLoad];
     
-    _timer = [KYTimer timerWithTimeInterval:1 proxy:self selector:@selector(timerProxyRun) userInfo:nil repeats:YES];
-    
-    _gcdTimer = [KYTimer gcdTimerWithStartInterval:10 timeInterval:1 repeat:YES action:^{
-        NSLog(@"基于gcdtimer的定时器");
-    }];
-	
+    self.view.backgroundColor = [UIColor redColor];
 }
 
--(void)timerProxyRun{
-    NSLog(@"基于nstimer的定时器");
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    KYTimerViewController *timerVc = [[KYTimerViewController alloc] init];
+    timerVc.modalPresentationStyle = UIModalPresentationFullScreen;
+    [self presentViewController:timerVc animated:YES completion:nil];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
 
 @end
