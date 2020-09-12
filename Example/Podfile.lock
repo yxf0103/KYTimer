@@ -1,5 +1,5 @@
 PODS:
-  - KYTimer (0.1.0)
+  - KYTimer (0.1.1)
 
 DEPENDENCIES:
   - KYTimer (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  KYTimer: ee56a0bf3636d20e77123726c8736a73f6db8f6c
+  KYTimer: caff560473a209fd3d2fa593d110e7b13ff2e0ae
 
 PODFILE CHECKSUM: eeca0fd79a0eea68ad6d006f66a1d87eba375a76
 

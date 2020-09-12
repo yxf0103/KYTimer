@@ -21,6 +21,25 @@ it, simply add the following line to your Podfile:
 ```ruby
 pod 'KYTimer'
 ```
+## How to use
+> 使用时KYTimer需要被强引用，否则会自动释放
+
+### 方案1
+```
+_timer = [KYTimer timerWithTimeInterval:1 target:self selector:@selector(timerProxyRun) userInfo:nil repeat:YES];
+[_timer addTimerToRunloop:[NSRunLoop currentRunLoop] mode:NSRunLoopCommonModes];
+
+```
+
+### 方案2
+```
+_gcdTimer = [KYTimer gcdTimerWithStartInterval:10 timeInterval:1 action:^{
+    NSLog(@"基于gcdtimer的定时器");
+} queue:dispatch_get_main_queue() repeat:YES];
+[_gcdTimer gcdFire];
+
+```
+
 
 ## Author
 
