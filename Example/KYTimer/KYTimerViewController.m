@@ -7,13 +7,14 @@
 //
 
 #import "KYTimerViewController.h"
-#import "KYTimer.h"
+#import <KYTimer/KYProxyTimer.h>
+#import <KYTimer/KYGCDTimer.h>
 
 @interface KYTimerViewController ()
 
-@property (nonatomic,strong)KYTimer *timer;
+@property (nonatomic,strong)KYProxyTimer *timer;
 
-@property (nonatomic,strong)KYTimer *gcdTimer;
+@property (nonatomic,strong)KYGCDTimer *gcdTimer;
 
 @end
 
@@ -29,14 +30,13 @@
     btn.frame = CGRectMake(100, 100, 80, 40);
     [btn addTarget:self action:@selector(dismissBtnClicked:) forControlEvents:UIControlEventTouchUpInside];
     
-    _timer = [KYTimer timerWithTimeInterval:1 target:self selector:@selector(timerProxyRun) userInfo:nil repeat:YES];
+    _timer = [KYProxyTimer timerWithTimeInterval:1 target:self selector:@selector(timerProxyRun) userInfo:nil repeat:YES];
     [_timer addTimerToRunloop:[NSRunLoop currentRunLoop] mode:NSRunLoopCommonModes];
     
-    _gcdTimer = [KYTimer gcdTimerWithStartInterval:10 timeInterval:1 action:^{
+    _gcdTimer = [KYGCDTimer timerStartAfter:10 timeInterval:1 action:^{
         NSLog(@"基于gcdtimer的定时器");
     } queue:dispatch_get_main_queue() repeat:YES];
-    [_gcdTimer gcdFire];
-    
+    [_gcdTimer fire];
     
 }
 

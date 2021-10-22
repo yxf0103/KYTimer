@@ -26,17 +26,17 @@ pod 'KYTimer'
 
 ### 方案1
 ```
-_timer = [KYTimer timerWithTimeInterval:1 target:self selector:@selector(timerProxyRun) userInfo:nil repeat:YES];
+_timer = [KYProxyTimer timerWithTimeInterval:1 target:self selector:@selector(timerProxyRun) userInfo:nil repeat:YES];
 [_timer addTimerToRunloop:[NSRunLoop currentRunLoop] mode:NSRunLoopCommonModes];
 
 ```
 
 ### 方案2
 ```
-_gcdTimer = [KYTimer gcdTimerWithStartInterval:10 timeInterval:1 action:^{
+_gcdTimer = [KYGCDTimer timerStartAfter:10 timeInterval:1 action:^{
     NSLog(@"基于gcdtimer的定时器");
 } queue:dispatch_get_main_queue() repeat:YES];
-[_gcdTimer gcdFire];
+[_gcdTimer fire];
 
 ```
 

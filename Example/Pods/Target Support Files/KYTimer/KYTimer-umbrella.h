@@ -10,7 +10,8 @@
 #endif
 #endif
 
-#import "KYTimer.h"
+#import "KYGCDTimer.h"
+#import "KYProxyTimer.h"
 
 FOUNDATION_EXPORT double KYTimerVersionNumber;
 FOUNDATION_EXPORT const unsigned char KYTimerVersionString[];
