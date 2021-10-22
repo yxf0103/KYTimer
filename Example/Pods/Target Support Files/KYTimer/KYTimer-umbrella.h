@@ -12,6 +12,7 @@
 
 #import "KYGCDTimer.h"
 #import "KYProxyTimer.h"
+#import "KYTimer.h"
 
 FOUNDATION_EXPORT double KYTimerVersionNumber;
 FOUNDATION_EXPORT const unsigned char KYTimerVersionString[];
